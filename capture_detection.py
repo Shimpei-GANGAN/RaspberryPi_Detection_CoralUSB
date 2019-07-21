@@ -1,4 +1,3 @@
-"""A demo to classify Raspberry Pi camera stream."""
 
 import cv2 
 import numpy as np
