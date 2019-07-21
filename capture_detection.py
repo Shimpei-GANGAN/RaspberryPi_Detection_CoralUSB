@@ -41,9 +41,6 @@ def draw_image(image, results, labels):
         displayImage = np.asarray(image)
         cv2.imshow("Coral Live Object Detection", displayImage)
 
-def 
-
-
 
 def main():
     parser = argparse.ArgumentParser()
