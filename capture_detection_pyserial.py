@@ -2,24 +2,28 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #	Updata History
-#	July  22  05:00, 2018 (Mon)
+#	July  26  10:00, 2018 (Fri)
 #------------------------------------------------------------
 #
-#	Raspberry Pi to Arduino
-#    リアルタイム検出結果に合わせてArudinoの処理を変化
+#	Raspberry Pi + Coral USB ACCElERATOR to Arduino
+#    Coral USBを用いたリアルタイム物体検出・顔検出
+#    検出に合わせてArduinoを制御する
 #
 #------------------------------------------------------------
 
 import cv2 
 import numpy as np
 import argparse, time, re
-import serial
+import serial, threading
 
 from edgetpu.detection.engine import DetectionEngine
 from PIL import Image, ImageDraw, ImageFont
 
 from imutils.video import FPS
 from imutils.video import VideoStream
+
+def serail_arduino():
+    pass
 
 
 def ReadLabelFile(file_path):
@@ -31,9 +35,7 @@ def ReadLabelFile(file_path):
         ret[int(pair[0])] = pair[1].strip()
     return ret
 
-cnt = 0
-def draw_image(image, results, labels):
-#    global cnt
+def draw_image(image, results, labels, ser):
     result_size = len(results)
     for idx, obj in enumerate(results):
         #  Prepare image for drawing
@@ -50,30 +52,20 @@ def draw_image(image, results, labels):
         if labels:
             display_str = labels[obj.label_id] + ": " + str(round(obj.score*100, 2)) + "%"
             draw.text((box[0], box[1]), display_str, font=ImageFont.truetype("/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf", 20))
-
+        
         displayImage = np.asarray(image)
         cv2.imshow("Coral Live Object Detection", displayImage)
+
+    
+    if labels[obj.label_id] == "person":
+        print("ser")
+        ser.write(b"1")
+        time.sleep(1)
         
-        if labels[obj.label_id] == "person":
-#            cnt += 1
-            Serial2Arduino("r")
-        else:
-            Serial2Arduino("g")
-#        if cnt == 100:
-#            print("led on")
-#            Serial2Arduino("r")
-#            cnt = 0
-
-
-#  Pyserialを用いてArduinoとシリアル通信
-def Serial2Arduino(flag):
-    if flag == "r":
-        with serial.Serial("/dev/ttyACM0", timeout=1) as ser:
-            ser.write(b"1")
-    if flag == "g":
-        with serial.Serial("/dev/ttyACM0", timeout=1) as ser:
-            ser.write(b"0")
-    time.sleep(1)
+    if labels[obj.label_id] == "bottle":
+        ser.write(b"0")
+        time.sleep(1)
+    
 
 def main():
     parser = argparse.ArgumentParser()
@@ -100,6 +92,8 @@ def main():
     time.sleep(1)
 
     fps = FPS().start()
+    ser = serial.Serial("/dev/ttyACM0", 115200)
+    print("Open Port")
 
     while True:
         try:
@@ -114,8 +108,9 @@ def main():
                                              top_k=args.maxobjects)
 
             #  draw image
-            draw_image(image, results, labels)
-
+            ans = draw_image(image, results, labels, ser)
+            
+            #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
                 fps.stop()
                 break
@@ -128,6 +123,8 @@ def main():
     print("Elapsed time: {}".format(str(fps.elapsed())))
     print("Approx FPS: {}".format(str(fps.fps())))
 
+    print("Close Port")
+    ser.close()
     cv2.destroyAllWindows()
     vs.stop()
     time.sleep(2)
