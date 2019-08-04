@@ -1,29 +1,26 @@
 #------------------------------------------------------------
 #   coding:utf-8
 #------------------------------------------------------------
-#	Updata History
-#	July  26  10:00, 2018 (Fri)
+#   Updata History
+#   July  26  10:00, 2018 (Fri)
 #------------------------------------------------------------
 #
-#	Raspberry Pi + Coral USB ACCElERATOR to Arduino
-#    Coral USBを用いたリアルタイム物体検出・顔検出
-#    検出に合わせてArduinoを制御する
+#   Raspberry Pi + Coral USB ACCElERATOR to Arduino
+#     Coral USBを用いたリアルタイム物体検出・顔検出
+#     検出に合わせてArduinoを制御する
 #
 #------------------------------------------------------------
 
 import cv2 
 import numpy as np
 import argparse, time, re
-import serial, threading
+import serial
 
 from edgetpu.detection.engine import DetectionEngine
 from PIL import Image, ImageDraw, ImageFont
 
 from imutils.video import FPS
 from imutils.video import VideoStream
-
-def serail_arduino():
-    pass
 
 
 def ReadLabelFile(file_path):
@@ -34,6 +31,7 @@ def ReadLabelFile(file_path):
         pair = line.strip().split(maxsplit=1)
         ret[int(pair[0])] = pair[1].strip()
     return ret
+
 
 def draw_image(image, results, labels, ser):
     result_size = len(results)
@@ -55,7 +53,6 @@ def draw_image(image, results, labels, ser):
         
         displayImage = np.asarray(image)
         cv2.imshow("Coral Live Object Detection", displayImage)
-
     
     if labels[obj.label_id] == "person":
         print("ser")

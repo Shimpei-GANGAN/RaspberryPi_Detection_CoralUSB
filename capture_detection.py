@@ -1,7 +1,18 @@
+#------------------------------------------------------------
+#   coding:utf-8
+#------------------------------------------------------------
+#	Updata History
+#	July  22  02:00, 2018 (Mon)
+#------------------------------------------------------------
+#
+#	Raspberry Pi + Coral USB ACCElERATOR
+#    Coral USBを用いたリアルタイム物体検出・顔検出
+#
+#------------------------------------------------------------
 
 import cv2 
 import numpy as np
-import argparse, time, re
+import argparse, time
 
 from edgetpu.detection.engine import DetectionEngine
 from PIL import Image, ImageDraw, ImageFont
