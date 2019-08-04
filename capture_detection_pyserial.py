@@ -5,7 +5,7 @@
 #   July  26  10:00, 2018 (Fri)
 #------------------------------------------------------------
 #
-#   Raspberry Pi + Coral USB ACCElERATOR to Arduino
+#   Raspberry Pi + Coral USB ACCELERATOR to Arduino
 #     Coral USBを用いたリアルタイム物体検出・顔検出
 #     検出に合わせてArduinoを制御する
 #
