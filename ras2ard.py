@@ -5,7 +5,7 @@
 #   November  11  23:00, 2019 (Mon)
 #------------------------------------------------------------
 #
-#   Raspberry Pi + Coral USB ACCELERATOR
+#   Raspberry Pi + Coral USB ACCELERATOR + Arduino
 #   Coral USBを用いたリアルタイム物体検出・顔検出
 #
 #   本プログラムではcv2.VideoCapture()を使用
@@ -30,7 +30,7 @@ from PIL import Image, ImageDraw, ImageFont
 def draw_image(image, results, labels):
     set_font = "/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf"
     result_size = len(results)
-
+    display_label = []
     for idx, obj in enumerate(results):
         #  Prepare image for drawing
         draw = ImageDraw.Draw(image)
@@ -46,10 +46,11 @@ def draw_image(image, results, labels):
         if labels:
             display_str = labels[obj.label_id] + ": " + str(round(obj.score*100, 2)) + "%"
             draw.text((box[0], box[1]), display_str, font=ImageFont.truetype(set_font, 20))
+            display_label.append(labels[obj.label_id])
 
     displayImage = np.asarray(image)
     cv2.imshow("Coral Live Object Detection", displayImage)
-
+    return display_label
 
 """
     Argumentsの設定
@@ -137,11 +138,22 @@ def main():
                 keep_aspect_ratio=args.keep_aspect_ratio,
                 relative_coord=False,
                 top_k=args.maxobjects)
+            print(results)
 
             #  draw image
-            draw_image(image, results, labels)
+            draw_label = draw_image(image, results, labels)
             #print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
 
+            for _ in draw_label:
+                if _ == "bottle":
+                    print("Test---------------------------------")
+                    #ser.write(b"1")
+                    #time.sleep(1)
+                else:
+                    pass
+                    #ser.write(b"0")
+                    #time.sleep(1)
+            
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
                 break
@@ -152,12 +164,6 @@ def main():
     print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
     cap.release()
     cv2.destroyAllWindows()
-
-    for i in range(10):
-        ser.write(b"1")
-        time.sleep(1)
-        ser.write(b"0")
-        time.sleep(1)
     print("Close Port")
     ser.close()
 
