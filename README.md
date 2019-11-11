@@ -1,8 +1,10 @@
 # RaspberryPi_Detection_CoralUSB
 Raspberry Pi 3 Model B+でCoral USB アクセラレータを使用したリアルタイム物体検出・顔検出を実行する。
 
+***
 ## ソース詳細
-- <b>capute_detection.py</b>
+***
+### capute_detection.py
 
 Coral USB アクセラレータを使用したリアルタイム物体検出・リアルタイム顔検出用。入力モデルを指定することで物体検出と顔検出をスイッチング可能。
 imutis.video.VideoStreamを使用。
@@ -19,7 +21,9 @@ imutis.video.VideoStreamを使用。
     --label coco_labels.txt \
     --keep_aspect_ratio
 
-- <b>capute_detection_cv2.py</b>
+*** 
+
+### capute_detection_cv2.py
 
 Coral USB アクセラレータを使用したリアルタイム物体検出・リアルタイム顔検出用。入力モデルを指定することで物体検出と顔検出をスイッチング可能。
 cv2.VideoCaptureを使用。
@@ -36,6 +40,7 @@ cv2.VideoCaptureを使用。
     --label coco_labels.txt \
     --keep_aspect_ratio
 
+***
 ## デモ等に関する公開記事はこちらより
 - https://gangannikki.hatenadiary.jp/entry/2019/07/20/230000
 
