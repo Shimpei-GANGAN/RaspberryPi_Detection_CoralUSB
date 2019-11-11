@@ -1,9 +1,8 @@
 # RaspberryPi_Detection_CoralUSB
 Raspberry Pi 3 Model B+でCoral USB アクセラレータを使用したリアルタイム物体検出・顔検出を実行する。
 
-***
+
 ## ソース詳細
-***
 ### capute_detection.py
 
 Coral USB アクセラレータを使用したリアルタイム物体検出・リアルタイム顔検出用。入力モデルを指定することで物体検出と顔検出をスイッチング可能。
