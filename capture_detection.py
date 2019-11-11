@@ -44,8 +44,8 @@ def draw_image(image, results, labels):
             display_str = labels[obj.label_id] + ": " + str(round(obj.score*100, 2)) + "%"
             draw.text((box[0], box[1]), display_str, font=ImageFont.truetype("/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf", 20))
 
-        displayImage = np.asarray(image)
-        cv2.imshow("Coral Live Object Detection", displayImage)
+    displayImage = np.asarray(image)
+    cv2.imshow("Coral Live Object Detection", displayImage)
 
 
 """
