@@ -8,20 +8,18 @@
 #   Raspberry Pi + Coral USB ACCELERATOR
 #   Coral USBを用いたリアルタイム物体検出・顔検出
 #
-#   本プログラムではVideoStream()を使用
+#   本プログラムではcv2.VideoCapture()を使用
 #------------------------------------------------------------
 
 import cv2 
 import numpy as np
-import argparse, time
+import argparse
+import time
+import sys
 
 from edgetpu.detection.engine import DetectionEngine
 from edgetpu.utils import dataset_utils
 from PIL import Image, ImageDraw, ImageFont
-
-from imutils.video import FPS
-from imutils.video import VideoStream
-
 
 """
     矩形の描画および表示
@@ -94,16 +92,21 @@ def main():
     labels = dataset_utils.read_label_file(args.label) if args.label else None
 
     #  Initialize video stream
-    vs = VideoStream(usePiCamera=args.picamera, resolution=(640, 480)).start()
-    time.sleep(1)
+    cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    #cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("H", "2", "6", "4"))
 
-    fps = FPS().start()
+    #  Camera error handling
+    if cap.isOpened() == False:
+        print("Cannot open")
+        sys.exit(1)
 
-    while True:
-        try:
+    try:
+        while True:
             #  Read frame from video
-            screenshot = vs.read()
-            image = Image.fromarray(screenshot)
+            _, img = cap.read()
+            image = Image.fromarray(img)
 
             #  Perform inference
             results = engine.detect_with_image(
@@ -112,27 +115,21 @@ def main():
                 keep_aspect_ratio=args.keep_aspect_ratio,
                 relative_coord=False,
                 top_k=args.maxobjects)
-            
+
             #  draw image
             draw_image(image, results, labels)
 
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
-                fps.stop()
                 break
 
-            fps.update()
-        except KeyboardInterrupt:
-            fps.stop()
-            break
+            #fps.update()
+    except KeyboardInterrupt:
+        print("Exit loop by Ctrl-c")
     
-    print("Elapsed time: {}".format(str(fps.elapsed())))
-    print("Approx FPS: {}".format(str(fps.fps())))
-    
+    print("Approx FPS: {}".format(str(cv2.get)))
+    cap.release()
     cv2.destroyAllWindows()
-    vs.stop()
-    time.sleep(2)
-
     
 if __name__ == "__main__":
     main()
