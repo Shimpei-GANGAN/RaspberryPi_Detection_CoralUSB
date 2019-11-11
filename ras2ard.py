@@ -2,7 +2,7 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  11  21:00, 2019 (Mon)
+#   November  11  23:00, 2019 (Mon)
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR
@@ -11,16 +11,18 @@
 #   本プログラムではcv2.VideoCapture()を使用
 #------------------------------------------------------------
 
-import cv2 
-import numpy as np
 import argparse
 import time
 import sys
 import serial
 
+import cv2 
+import numpy as np
+import picamera
 from edgetpu.detection.engine import DetectionEngine
 from edgetpu.utils import dataset_utils
 from PIL import Image, ImageDraw, ImageFont
+
 
 """
     矩形の描画および表示
@@ -66,7 +68,7 @@ def setting_argument():
         "--threshold", type=float, default=0.05, help="Minimum threshold")
     parser.add_argument(
         "--picamera", action="store_true",
-        help="Use PiCamera for image capture", default=False)
+        help="Use PiCamera for image capture")
     parser.add_argument(
         '--keep_aspect_ratio',
         dest='keep_aspect_ratio',
@@ -95,19 +97,32 @@ def main():
     labels = dataset_utils.read_label_file(args.label) if args.label else None
 
     #  Initialize video stream
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("H", "2", "6", "4"))
-    # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
+    print("--------------------------------")
+    if not args.picamera:
+        #  Set usb camera
+        print("Use : usb camera")
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("H", "2", "6", "4"))
+        # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
+    
+        #  Camera error handling
+        if cap.isOpened() == False:
+            print("Cannot open")
+            sys.exit(1)
 
-    #  Camera error handling
-    if cap.isOpened() == False:
-        print("Cannot open")
-        sys.exit(1)
+    else:
+        # Set picamera
+        print("Use : picamera")
+        cap = picamera.PiCamera()
+        cap.resolution = (640, 480)
+        cap.framerate = 30
+    print("--------------------------------")
 
-    #  Initialize Serial
-    ser = serial.Serial("/dev/ttyACM0", 115200)
+    #  Initialize serial
+    print("Open Port")
+    ser = serial.Serial("/dev/ttyACM0", 9600)
 
     try:
         while True:
@@ -125,6 +140,7 @@ def main():
 
             #  draw image
             draw_image(image, results, labels)
+            #print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
 
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
@@ -136,6 +152,15 @@ def main():
     print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
     cap.release()
     cv2.destroyAllWindows()
+
+    for i in range(10):
+        ser.write(b"1")
+        time.sleep(1)
+        ser.write(b"0")
+        time.sleep(1)
+    print("Close Port")
+    ser.close()
+
     
 if __name__ == "__main__":
     main()
