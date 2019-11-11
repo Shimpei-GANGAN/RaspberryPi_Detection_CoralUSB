@@ -2,7 +2,7 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  11  20:00, 2019 (Mon)
+#   November  11  21:00, 2019 (Mon)
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR
@@ -16,6 +16,7 @@ import numpy as np
 import argparse
 import time
 import sys
+import serial
 
 from edgetpu.detection.engine import DetectionEngine
 from edgetpu.utils import dataset_utils
@@ -105,6 +106,9 @@ def main():
         print("Cannot open")
         sys.exit(1)
 
+    #  Initialize Serial
+    ser = serial.Serial("/dev/ttyACM0", 115200)
+
     try:
         while True:
             #  Read frame from video
@@ -121,12 +125,11 @@ def main():
 
             #  draw image
             draw_image(image, results, labels)
-            print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
 
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
                 break
-            
+
     except KeyboardInterrupt:
         print("Exit loop by Ctrl-c")
     
