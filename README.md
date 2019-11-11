@@ -4,12 +4,37 @@ Raspberry Pi 3 Model B+でCoral USB アクセラレータを使用したリア�
 ## ソース詳細
 - <b>capute_detection.py</b>
 
-Coral USB アクセラレータを使用したリアルタイム物体検出・リアルタイム顔検出用。入力モデルで物体検出と顔検出をスイッチング。
+Coral USB アクセラレータを使用したリアルタイム物体検出・リアルタイム顔検出用。入力モデルを指定することで物体検出と顔検出をスイッチング可能。
+imutis.video.VideoStreamを使用。
 
-- <b>capute_detection_pyserial.py</b>
+### Example (Running under edgetpu repo's root directory):
+    # Face Detection
+    python3 ~/RaspberryPi_Detection_CoralUSB/capture_detection.py \
+    --model test_data/mobilenet_ssd_v2_face_quant_postprocess_edgetpu.tflite \
+    --keep_aspect_ratio
 
-Coral USB アクセラレータを使用したリアルタイム物体検出・リアルタイム顔検出用。入力モデルで物体検出と顔検出をスイッチング。
-検出結果はPyserialを用いてArduinoに送信し、結果に合わせて処理を行う。
+    # Object Detection(Coco)
+    python3 ~/RaspberryPi_Detection_CoralUSB/capture_detection.py \
+    --model test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite \
+    --label coco_labels.txt \
+    --keep_aspect_ratio
+
+- <b>capute_detection_cv2.py</b>
+
+Coral USB アクセラレータを使用したリアルタイム物体検出・リアルタイム顔検出用。入力モデルを指定することで物体検出と顔検出をスイッチング可能。
+cv2.VideoCaptureを使用。
+
+### Example (Running under edgetpu repo's root directory):
+    # Face Detection
+    python3 ~/RaspberryPi_Detection_CoralUSB/capture_detection_cv2.py \
+    --model test_data/mobilenet_ssd_v2_face_quant_postprocess_edgetpu.tflite \
+    --keep_aspect_ratio
+
+    # Object Detection(Coco)
+    python3 ~/RaspberryPi_Detection_CoralUSB/capture_detection_cv2.py \
+    --model test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite \
+    --label coco_labels.txt \
+    --keep_aspect_ratio
 
 ## デモ等に関する公開記事はこちらより
 - https://gangannikki.hatenadiary.jp/entry/2019/07/20/230000
