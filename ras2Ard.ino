@@ -1,4 +1,4 @@
-#define LED_PIN1 13
+#define LED_PIN1 2
 byte val = 0;
 
 void setup() {

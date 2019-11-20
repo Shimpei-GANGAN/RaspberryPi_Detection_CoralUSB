@@ -2,7 +2,7 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  11  23:00, 2019 (Mon)
+#   November  20  09:00, 2019 (Wed)
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR
@@ -102,6 +102,7 @@ def main():
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        #cap.set(cv2.CAP_PROP_FPS, 10)
         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("H", "2", "6", "4"))
         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
     

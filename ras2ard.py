@@ -138,7 +138,7 @@ def main():
                 keep_aspect_ratio=args.keep_aspect_ratio,
                 relative_coord=False,
                 top_k=args.maxobjects)
-            print(results)
+            #print(results)
 
             #  draw image
             draw_label = draw_image(image, results, labels)
@@ -147,12 +147,12 @@ def main():
             for _ in draw_label:
                 if _ == "bottle":
                     print("Test---------------------------------")
-                    #ser.write(b"1")
-                    #time.sleep(1)
+                    ser.write(b"1")
+                    time.sleep(0.01)
                 else:
                     pass
-                    #ser.write(b"0")
-                    #time.sleep(1)
+                    ser.write(b"0")
+                    time.sleep(0.01)
             
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
@@ -164,6 +164,14 @@ def main():
     print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
     cap.release()
     cv2.destroyAllWindows()
+    #  動作確認
+    """
+    for _ in range(5):
+        ser.write(b"1")
+        time.sleep(0.5)
+        ser.write(b"0")
+        time.sleep(0.5)
+    """
     print("Close Port")
     ser.close()
 
