@@ -2,7 +2,7 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  11  23:00, 2019 (Mon)
+#   November  23  23:00, 2019 (Sat)
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR + Arduino
@@ -27,7 +27,7 @@ from PIL import Image, ImageDraw, ImageFont
 """
     矩形の描画および表示
 """
-def draw_image(image, results, labels):
+def draw_image(image, results, labels, maxobjects):
     set_font = "/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf"
     result_size = len(results)
     display_label = []
@@ -39,14 +39,15 @@ def draw_image(image, results, labels):
         box = obj.bounding_box.flatten().tolist()
 
         #  Draw rectangle to desired thickness
-        for x in range( 0, 4 ):
+        for x in range( 0, maxobjects ):
             draw.rectangle(box, outline=(0, 0, 255))
 
         #  Annotate image with label and confidence score
         if labels:
             display_str = labels[obj.label_id] + ": " + str(round(obj.score*100, 2)) + "%"
             draw.text((box[0], box[1]), display_str, font=ImageFont.truetype(set_font, 20))
-            display_label.append(labels[obj.label_id])
+            display_label.append(labels[obj.label_id], labels[obj.score])
+            print(display_label)
 
     displayImage = np.asarray(image)
     cv2.imshow("Coral Live Object Detection", displayImage)
@@ -55,7 +56,7 @@ def draw_image(image, results, labels):
 """
     Argumentsの設定
 """
-def setting_argument():
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
       '--model',
@@ -91,7 +92,7 @@ def setting_argument():
 """
 def main():
     #  Set up args
-    args = setting_argument()
+    args = parse_args()
 
     #  Initialize engine
     engine = DetectionEngine(args.model)
@@ -141,18 +142,17 @@ def main():
             #print(results)
 
             #  draw image
-            draw_label = draw_image(image, results, labels)
+            draw_label = draw_image(image, results, labels, args.maxobjects)
             #print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
 
             for _ in draw_label:
                 if _ == "bottle":
                     print("Test---------------------------------")
                     ser.write(b"1")
-                    time.sleep(0.01)
+                    #time.sleep(0.01)
                 else:
-                    pass
                     ser.write(b"0")
-                    time.sleep(0.01)
+                    #time.sleep(0.01)
             
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):

@@ -52,7 +52,7 @@ def draw_image(image, results, labels):
 """
     Argumentsの設定
 """
-def setting_argument():
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
       '--model',
@@ -88,7 +88,7 @@ def setting_argument():
 """
 def main():
     #  Set up args
-    args = setting_argument()
+    args = parse_args()
 
     #  Initialize engine
     engine = DetectionEngine(args.model)
