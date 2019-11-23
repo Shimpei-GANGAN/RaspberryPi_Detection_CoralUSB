@@ -2,7 +2,7 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  23  23:00, 2019 (Sat)
+#   November  23  02:00, 2019 (Sat)
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR + Arduino
@@ -29,8 +29,8 @@ from PIL import Image, ImageDraw, ImageFont
 """
 def draw_image(image, results, labels, maxobjects):
     set_font = "/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf"
-    result_size = len(results)
     display_label = []
+    
     for idx, obj in enumerate(results):
         #  Prepare image for drawing
         draw = ImageDraw.Draw(image)
@@ -46,11 +46,10 @@ def draw_image(image, results, labels, maxobjects):
         if labels:
             display_str = labels[obj.label_id] + ": " + str(round(obj.score*100, 2)) + "%"
             draw.text((box[0], box[1]), display_str, font=ImageFont.truetype(set_font, 20))
-            display_label.append(labels[obj.label_id], labels[obj.score])
-            print(display_label)
+            display_label.append([labels[obj.label_id], obj.score])
+    #print(display_label)
 
-    displayImage = np.asarray(image)
-    cv2.imshow("Coral Live Object Detection", displayImage)
+    cv2.imshow("Coral Live Object Detection", np.asarray(image))
     return display_label
 
 """
@@ -146,10 +145,11 @@ def main():
             #print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
 
             for _ in draw_label:
-                if _ == "bottle":
-                    print("Test---------------------------------")
-                    ser.write(b"1")
-                    #time.sleep(0.01)
+                if _[0] == "bottle":
+                    if _[1] > 0.9:
+                        #print("Test---------------------------------")
+                        ser.write(b"1")
+                        #time.sleep(0.01)
                 else:
                     ser.write(b"0")
                     #time.sleep(0.01)
