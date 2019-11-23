@@ -2,10 +2,10 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  20  09:00, 2019 (Wed)
+#   November  23  02:00, 2019 (Sat)
 #------------------------------------------------------------
 #
-#   Raspberry Pi + Coral USB ACCELERATOR
+#   Raspberry Pi + Coral USB ACCELERATOR + Arduino
 #   Coral USBを用いたリアルタイム物体検出・顔検出
 #
 #   本プログラムではcv2.VideoCapture()を使用
@@ -14,6 +14,7 @@
 import argparse
 import time
 import sys
+import serial
 
 import cv2 
 import numpy as np
@@ -22,13 +23,14 @@ from edgetpu.detection.engine import DetectionEngine
 from edgetpu.utils import dataset_utils
 from PIL import Image, ImageDraw, ImageFont
 
+
 """
     矩形の描画および表示
 """
-def draw_image(image, results, labels):
+def draw_image(image, results, labels, maxobjects):
     set_font = "/usr/share/fonts/truetype/piboto/Piboto-Regular.ttf"
-    result_size = len(results)
-
+    display_label = []
+    
     for idx, obj in enumerate(results):
         #  Prepare image for drawing
         draw = ImageDraw.Draw(image)
@@ -37,17 +39,18 @@ def draw_image(image, results, labels):
         box = obj.bounding_box.flatten().tolist()
 
         #  Draw rectangle to desired thickness
-        for x in range( 0, 4 ):
+        for x in range( 0, maxobjects ):
             draw.rectangle(box, outline=(0, 0, 255))
 
         #  Annotate image with label and confidence score
         if labels:
             display_str = labels[obj.label_id] + ": " + str(round(obj.score*100, 2)) + "%"
             draw.text((box[0], box[1]), display_str, font=ImageFont.truetype(set_font, 20))
+            display_label.append([labels[obj.label_id], obj.score])
+    #print(display_label)
 
-    displayImage = np.asarray(image)
-    cv2.imshow("Coral Live Object Detection", displayImage)
-
+    cv2.imshow("Coral Live Object Detection", np.asarray(image))
+    return display_label
 
 """
     Argumentsの設定
@@ -102,7 +105,6 @@ def main():
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        #cap.set(cv2.CAP_PROP_FPS, 10)
         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("H", "2", "6", "4"))
         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc("M", "J", "P", "G"))
     
@@ -119,6 +121,10 @@ def main():
         cap.framerate = 30
     print("--------------------------------")
 
+    #  Initialize serial
+    print("Open Port")
+    ser = serial.Serial("/dev/ttyACM0", 9600)
+
     try:
         while True:
             #  Read frame from video
@@ -132,11 +138,22 @@ def main():
                 keep_aspect_ratio=args.keep_aspect_ratio,
                 relative_coord=False,
                 top_k=args.maxobjects)
+            #print(results)
 
             #  draw image
-            draw_image(image, results, labels)
+            draw_label = draw_image(image, results, labels, args.maxobjects)
             #print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
 
+            for _ in draw_label:
+                if _[0] == "bottle":
+                    if _[1] > 0.9:
+                        #print("Test---------------------------------")
+                        ser.write(b"1")
+                        #time.sleep(0.01)
+                else:
+                    ser.write(b"0")
+                    #time.sleep(0.01)
+            
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
                 break
@@ -147,6 +164,17 @@ def main():
     print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
     cap.release()
     cv2.destroyAllWindows()
+    #  動作確認
+    """
+    for _ in range(5):
+        ser.write(b"1")
+        time.sleep(0.5)
+        ser.write(b"0")
+        time.sleep(0.5)
+    """
+    print("Close Port")
+    ser.close()
+
     
 if __name__ == "__main__":
     main()
