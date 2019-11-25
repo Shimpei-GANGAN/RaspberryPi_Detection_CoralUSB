@@ -13,6 +13,7 @@ void loop() {
   //  条件分岐
   if ( val == '1') {
     digitalWrite(LED_PIN1, HIGH);
+    Serial.write(val)
   }
   else if( val == '0'){
     digitalWrite(LED_PIN1, LOW);
