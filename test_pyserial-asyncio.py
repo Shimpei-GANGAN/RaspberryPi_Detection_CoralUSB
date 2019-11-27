@@ -4,7 +4,7 @@
 #   Updata History
 #   November  27  11:00, 2019 (Wed)
 #------------------------------------------------------------
-#   Arduinoとの非同期通信tesst
+#   Arduinoとの非同期通信test
 #------------------------------------------------------------
 
 import asyncio
@@ -38,15 +38,19 @@ class Output(asyncio.Protocol):
 #  main function
 def main():
     loop = asyncio.get_event_loop()
-    #  future作成
-    future = loop.create_future()
-    future.add_done_callback(_callback)
+    coro = serial_asyncio.create_serial_connection(
+        loop, Output, 
+        "/dev/ttyACM0",
+        baudrate=9600)
+    server = loop.run_until_complete(coro)
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
 
-    coro = serial_asyncio.create_serial_connection(loop, Output, "/dev/ttyACM0", baudrate=9600)
-    #loop.call_soon(random_hit, future, n)
-    #loop.call_soon(eternal_hello, loop)
-    loop.run_until_complete(coro)
-    #loop.run_forever()
+    #  Close the server
+    server.close()
+    loop.run_until_complete(server.wait_closed())
     loop.close()
 
 if __name__ == "__main__":
