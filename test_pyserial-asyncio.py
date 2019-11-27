@@ -1,6 +1,11 @@
-# ------------------------------------------------------------
+#------------------------------------------------------------
 #   coding:utf-8
-# ------------------------------------------------------------
+#------------------------------------------------------------
+#   Updata History
+#   November  27  11:00, 2019 (Wed)
+#------------------------------------------------------------
+#   Arduinoとの非同期通信tesst
+#------------------------------------------------------------
 
 import asyncio
 import serial_asyncio
@@ -16,59 +21,22 @@ class Output(asyncio.Protocol):
         self.transport = transport
         print("port opened", transport)
         transport.serial.rts = False
-        transport.write(b"1")
+        transport.write(b"1;")
 
     #  When data is received
     def data_received(self, data):
         print("data received:", data)
-        self.transport.write(b"0")
-        self.transport.close()
-
+        if data == "finished":
+            self.transport.close()
+        self.transport.write(b"0;")
+        
     #  When a connection is lost
     def connection_lost(self, exc):
         print("port closed")
         asyncio.get_event_loop().stop()
 
-"""
-    e.g. future
-"""
-def random_hit(future, n_upper, cnt=1, loop=None):
-    # n_upper = n
-    if loop is None:
-        loop = asyncio.get_event_loop()
-    value = randint(1, n_upper)
-    #print(value)
-
-    if value == n_upper:
-        print("Hit!")
-        future.set_result(cnt)
-    else:
-        print("Not yet.")
-        cnt += 1
-        loop.call_soon(random_hit, future, n_upper, cnt, loop)
-
-def _callback(future):
-    print("DONE!")
-    loop = asyncio.get_event_loop()
-
-def eternal_hello(loop):
-    print("Hello!")
-    loop.call_soon(eternal_hello, loop)
-
-
 #  main function
 def main():
-    #  Initialize args
-    """
-    try:
-        n = int(sys.argv[1])
-    except IndexError:
-        print("Input an integer.")
-        n = int(input())
-    if n < 1:
-        n = 1
-    """
-
     loop = asyncio.get_event_loop()
     #  future作成
     future = loop.create_future()

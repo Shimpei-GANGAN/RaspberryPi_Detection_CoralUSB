@@ -20,6 +20,16 @@ void loop() {
       digitalWrite(LED_PIN1, LOW);
       Serial.println(str);
     }
+    //  finish test
+    else if( str == "q"){
+      for(int i=0; i < 2; i++){
+        digitalWrite(LED_PIN1, HIGH);
+        delay(100);        
+        digitalWrite(LED_PIN1, LOW);
+        delay(100);
+      }
+      Serial.println("finished");
+    }
     else{
       Serial.println("Enter the correct command.");
     }

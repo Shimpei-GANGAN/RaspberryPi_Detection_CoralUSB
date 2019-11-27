@@ -49,7 +49,7 @@ def draw_image(image, results, labels, maxobjects):
             display_label.append([labels[obj.label_id], obj.score])
     #print(display_label)
 
-    #cv2.imshow("Coral Live Object Detection", np.asarray(image))
+    cv2.imshow("Coral Live Object Detection", np.asarray(image))
     return display_label
 
 """
