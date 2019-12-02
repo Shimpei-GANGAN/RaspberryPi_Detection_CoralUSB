@@ -2,7 +2,7 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  25  21:00, 2019 (Mon)
+#   December  02  23:00, 2019 (Mon)
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR + Arduino
@@ -148,10 +148,10 @@ def main():
                 if _[0] == "bottle":
                     if _[1] > 0.9:
                         #print("Test---------------------------------")
-                        ser.write(b"1")
+                        ser.write(b"1;")
                         #time.sleep(0.01)
                 else:
-                    ser.write(b"0")
+                    ser.write(b"0;")
                     #time.sleep(0.01)
             
             #  closing confition
