@@ -54,40 +54,7 @@ def draw_image(image, results, labels, maxobjects):
     #print(display_label)
 
     cv2.imshow("Coral Live Object Detection", np.asarray(image))
-    return display_label
-
-"""
-    Argumentsの設定
-"""
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-      '--model',
-      help='Path of the detection model, it must be a SSD model with postprocessing operator.',
-      required=True)
-    parser.add_argument(
-        "--label", help="Path of the labels file.")
-    parser.add_argument(
-        "--maxobjects", type=int, default=3, help="Maximum objects")
-    parser.add_argument(
-        "--threshold", type=float, default=0.05, help="Minimum threshold")
-    parser.add_argument(
-        "--picamera", action="store_true",
-        help="Use PiCamera for image capture")
-    parser.add_argument(
-        '--keep_aspect_ratio',
-        dest='keep_aspect_ratio',
-        action='store_true',
-        help=(
-            'keep the image aspect ratio when down-sampling the image by adding '
-            'black pixel padding (zeros) on bottom or right. '
-            'By default the image is resized and reshaped without cropping. This '
-            'option should be the same as what is applied on input images during '
-            'model training. Otherwise the accuracy may be affected and the '
-            'bounding box of detection result may be stretched.'))
-    parser.set_defaults(keep_aspect_ratio=False)
-    args = parser.parse_args()
-    return args
+    #return display_label
 
 
 """
@@ -120,8 +87,39 @@ class Output(asyncio.Protocol):
 """
     メイン処理
 """
-async def main():
-    #  Set up args
+def Object_Detection(loop):
+    """
+        Set up Arguments
+    """
+    def parse_args():
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+        '--model',
+        help='Path of the detection model, it must be a SSD model with postprocessing operator.',
+        required=True)
+        parser.add_argument(
+            "--label", help="Path of the labels file.")
+        parser.add_argument(
+            "--maxobjects", type=int, default=3, help="Maximum objects")
+        parser.add_argument(
+            "--threshold", type=float, default=0.05, help="Minimum threshold")
+        parser.add_argument(
+            "--picamera", action="store_true",
+            help="Use PiCamera for image capture")
+        parser.add_argument(
+            '--keep_aspect_ratio',
+            dest='keep_aspect_ratio',
+            action='store_true',
+            help=(
+                'keep the image aspect ratio when down-sampling the image by adding '
+                'black pixel padding (zeros) on bottom or right. '
+                'By default the image is resized and reshaped without cropping. This '
+                'option should be the same as what is applied on input images during '
+                'model training. Otherwise the accuracy may be affected and the '
+                'bounding box of detection result may be stretched.'))
+        parser.set_defaults(keep_aspect_ratio=False)
+        args = parser.parse_args()
+        return args
     args = parse_args()
 
     #  Initialize engine
@@ -143,7 +141,6 @@ async def main():
         if cap.isOpened() == False:
             print("Cannot open")
             sys.exit(1)
-
     else:
         # Set picamera
         print("Use : picamera")
@@ -154,12 +151,7 @@ async def main():
 
     #  Initialize serial
     print("Open Port")
-    ser = serial.Serial("/dev/ttyACM0", baudrate=9600, write_timeout=1)
-    #loop = asyncio.get_event_loop()
-    #coro = serial_asyncio.create_serial_connection(
-    #    loop, Output, 
-    #    "/dev/ttyACM0",
-    #    baudrate=9600)
+    ser = serial.Serial("/dev/ttyACM0", baudrate=9600, write_timeout=0.1)
 
     try:
         while True:
@@ -176,15 +168,13 @@ async def main():
                 top_k=args.maxobjects)
             if results:
                 print(results)
-                #loop.run_until_complete(coro)
-                ser.write(b"1;")
+                #ser.write(b"1;")
             else:
-                #pass
-                ser.write(b"0;")
+                pass
+                #ser.write(b"0;")
 
             #  draw image
-            draw_label = draw_image(image, results, labels, args.maxobjects)
-            #print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
+            draw_image(image, results, labels, args.maxobjects)
             
             #  closing confition
             if cv2.waitKey(5) & 0xFF == ord("q"):
@@ -198,11 +188,28 @@ async def main():
     cv2.destroyAllWindows()
     print("Close Port")
     ser.close()
-    #loop.run_forever()
-    #loop.close()
 
-    
+def eternal_hello(future):
+    print("Hello!")
+    #loop.call_soon(eternal_hello, loop)
+
+def _callback(future):
+    print("DONE!")
+    loop = asyncio.get_event_loop()
+
+
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    future = loop.create_future()
+    future.add_done_callback(_callback)
+
+    loop.call_soon(Object_Detection, loop)
+    loop.call_soon(eternal_hello, future)
+    result = loop.run_until_complete(future)
+    print("{}回".format(result))
     loop.close()
+    #loop = asyncio.get_event_loop()
+    #coro = serial_asyncio.create_serial_connection(
+    #    loop, Output, 
+    #    "/dev/ttyACM0",
+    #    baudrate=9600)
