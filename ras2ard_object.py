@@ -6,7 +6,7 @@
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR + Arduino
-#   Coral USBを用いたリアルタイム物体検出・顔検出
+#   Coral USBを用いたリアルタイム物体検出
 #
 #   本プログラムではcv2.VideoCapture()を使用
 #------------------------------------------------------------
@@ -138,7 +138,6 @@ def main():
                 keep_aspect_ratio=args.keep_aspect_ratio,
                 relative_coord=False,
                 top_k=args.maxobjects)
-            #print(results)
 
             #  draw image
             draw_label = draw_image(image, results, labels, args.maxobjects)
@@ -164,14 +163,6 @@ def main():
     print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
     cap.release()
     cv2.destroyAllWindows()
-    #  動作確認
-    """
-    for _ in range(5):
-        ser.write(b"1")
-        time.sleep(0.5)
-        ser.write(b"0")
-        time.sleep(0.5)
-    """
     print("Close Port")
     ser.close()
 

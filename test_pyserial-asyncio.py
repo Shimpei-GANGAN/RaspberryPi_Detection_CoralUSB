@@ -2,7 +2,7 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  28  07:00, 2019 (Thu)
+#   December  02  23:00, 2019 (Mon)
 #------------------------------------------------------------
 #   Arduinoとの非同期通信test
 #------------------------------------------------------------
@@ -23,23 +23,13 @@ class Output(asyncio.Protocol):
         self._transport = transport
         print("port opened", self._transport)
         self._transport.serial.rts = False
-        self._transport.write(b"q;\n")
+        self._transport.write(b"1;\n")
 
     #  When data is received
     def data_received(self, data):
         print("data received", data)
         if b"\n" in data:
             self._transport.close()
-
-        """
-        if data == "finished":
-            print("data received:", data)
-            self.transport.close()
-        elif data == "1":
-            self.transport.write(b"0;")
-        elif data == "0":
-            self.transport.write(b"1;")
-        """
 
     #  When a connection is lost
     def connection_lost(self, exc):
