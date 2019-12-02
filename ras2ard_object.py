@@ -2,11 +2,11 @@
 #   coding:utf-8
 #------------------------------------------------------------
 #   Updata History
-#   November  25  21:00, 2019 (Mon)
+#   December  02  23:00, 2019 (Mon)
 #------------------------------------------------------------
 #
 #   Raspberry Pi + Coral USB ACCELERATOR + Arduino
-#   Coral USBを用いたリアルタイム物体検出・顔検出
+#   Coral USBを用いたリアルタイム物体検出
 #
 #   本プログラムではcv2.VideoCapture()を使用
 #------------------------------------------------------------
@@ -49,7 +49,7 @@ def draw_image(image, results, labels, maxobjects):
             display_label.append([labels[obj.label_id], obj.score])
     #print(display_label)
 
-    #cv2.imshow("Coral Live Object Detection", np.asarray(image))
+    cv2.imshow("Coral Live Object Detection", np.asarray(image))
     return display_label
 
 """
@@ -138,7 +138,6 @@ def main():
                 keep_aspect_ratio=args.keep_aspect_ratio,
                 relative_coord=False,
                 top_k=args.maxobjects)
-            #print(results)
 
             #  draw image
             draw_label = draw_image(image, results, labels, args.maxobjects)
@@ -148,10 +147,10 @@ def main():
                 if _[0] == "bottle":
                     if _[1] > 0.9:
                         #print("Test---------------------------------")
-                        ser.write(b"1")
+                        ser.write(b"1;")
                         #time.sleep(0.01)
                 else:
-                    ser.write(b"0")
+                    ser.write(b"0;")
                     #time.sleep(0.01)
             
             #  closing confition
@@ -164,14 +163,6 @@ def main():
     print("FPS: {}".format(cap.get(cv2.CAP_PROP_FPS)))
     cap.release()
     cv2.destroyAllWindows()
-    #  動作確認
-    """
-    for _ in range(5):
-        ser.write(b"1")
-        time.sleep(0.5)
-        ser.write(b"0")
-        time.sleep(0.5)
-    """
     print("Close Port")
     ser.close()
 
