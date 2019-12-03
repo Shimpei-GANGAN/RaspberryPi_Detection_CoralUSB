@@ -87,7 +87,7 @@ class Output(asyncio.Protocol):
 """
     メイン処理
 """
-def Object_Detection(loop):
+async def Object_Detection():
     """
         Set up Arguments
     """
@@ -151,34 +151,34 @@ def Object_Detection(loop):
 
     #  Initialize serial
     print("Open Port")
-    ser = serial.Serial("/dev/ttyACM0", baudrate=9600, write_timeout=0.1)
+    #ser = serial.Serial("/dev/ttyACM0", baudrate=9600, write_timeout=0.1)
 
     try:
-        while True:
-            #  Read frame from video
-            _, img = cap.read()
-            image = Image.fromarray(img)
+        #while True:
+        #  Read frame from video
+        _, img = cap.read()
+        image = Image.fromarray(img)
 
-            #  Perform inference
-            results = engine.detect_with_image(
-                image,
-                threshold=args.threshold,
-                keep_aspect_ratio=args.keep_aspect_ratio,
-                relative_coord=False,
-                top_k=args.maxobjects)
-            if results:
-                print(results)
-                #ser.write(b"1;")
-            else:
-                pass
-                #ser.write(b"0;")
+        #  Perform inference
+        results = engine.detect_with_image(
+            image,
+            threshold=args.threshold,
+            keep_aspect_ratio=args.keep_aspect_ratio,
+            relative_coord=False,
+            top_k=args.maxobjects)
+        if results:
+            print(results)
+            #ser.write(b"1;")
+        else:
+            pass
+            #ser.write(b"0;")
 
-            #  draw image
-            draw_image(image, results, labels, args.maxobjects)
+        #  draw image
+        draw_image(image, results, labels, args.maxobjects)
             
             #  closing confition
-            if cv2.waitKey(5) & 0xFF == ord("q"):
-                break
+        #    if cv2.waitKey(5) & 0xFF == ord("q"):
+        #        break
 
     except KeyboardInterrupt:
         print("Exit loop by Ctrl-c")
@@ -187,11 +187,12 @@ def Object_Detection(loop):
     cap.release()
     cv2.destroyAllWindows()
     print("Close Port")
-    ser.close()
+    #ser.close()
+    loop.call_soon(Object_Detection, loop)
 
 def eternal_hello(future):
     print("Hello!")
-    #loop.call_soon(eternal_hello, loop)
+    loop.call_soon(eternal_hello, loop)
 
 def _callback(future):
     print("DONE!")
@@ -200,15 +201,22 @@ def _callback(future):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    future = loop.create_future()
-    future.add_done_callback(_callback)
+    #future = loop.create_future()
+    #future.add_done_callback(_callback)
+    coro = serial_asyncio.create_serial_connection(
+        loop, Output, 
+        "/dev/ttyACM0",
+        baudrate=9600)
+    #    timeout=0.1)
 
-    loop.call_soon(Object_Detection, loop)
-    loop.call_soon(eternal_hello, future)
-    result = loop.run_until_complete(future)
-    print("{}回".format(result))
+    #loop.call_soon(Object_Detection, loop)
+    #loop.call_soon(eternal_hello, future)
+    loop.run_until_complete(Object_Detection())
+    #loop.run_until_complete(coro)
+    #result = loop.run_until_complete(future)
+    #print("{}回".format(result))
+    loop.run_forever()
     loop.close()
-    #loop = asyncio.get_event_loop()
     #coro = serial_asyncio.create_serial_connection(
     #    loop, Output, 
     #    "/dev/ttyACM0",
