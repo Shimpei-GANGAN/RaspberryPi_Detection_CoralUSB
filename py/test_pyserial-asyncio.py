@@ -39,13 +39,16 @@ class Output(asyncio.Protocol):
 #  main function
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
+    #  セットして
     coro = serial_asyncio.create_serial_connection(
         loop, Output, 
         "/dev/ttyACM0",
         baudrate=9600)
     #    timeout=0.1)
+    #  ループ呼ぶ(future的に)
     loop.run_until_complete(coro)
     #try:
+    #  ループを繰り返す
     loop.run_forever()
     #except KeyboardInterrupt:
     #    pass
